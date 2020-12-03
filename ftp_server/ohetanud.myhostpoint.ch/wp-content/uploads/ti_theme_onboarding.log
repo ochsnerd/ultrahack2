@@ -1,0 +1,19 @@
+[17/Nov/2020:16:57:50] (I): WordPress Instance Info:
+[17/Nov/2020:16:57:50] (I): Home URL : https://ohetanud.myhostpoint.ch
+[17/Nov/2020:16:57:50] (I): Site URL : https://ohetanud.myhostpoint.ch
+[17/Nov/2020:16:57:50] (I): WordPress Version : 5.5.3
+[17/Nov/2020:16:57:50] (I): Onboarding Version : 1.0.11
+[17/Nov/2020:16:57:50] (I): Multisite : No
+[17/Nov/2020:16:57:50] (I): Server Info : Apache
+[17/Nov/2020:16:57:50] (I): PHP Version : 7.4.12
+[17/Nov/2020:16:57:50] (I): HTTPS : Yes
+[17/Nov/2020:16:57:50] (I): PHP Max Execution Time : 30
+[17/Nov/2020:16:57:50] (I): PHP Max Input Vars : 1000
+[17/Nov/2020:16:57:50] (I): Max Upload Size : 16777216
+[17/Nov/2020:16:57:50] (I): Plugins:
+[17/Nov/2020:16:57:50] (I): [PLUGIN] Elementor : v3.0.13 (Elementor.com)
+[17/Nov/2020:16:57:50] (I): [PLUGIN] myStickymenu : v2.4.7 (Premio)
+[17/Nov/2020:16:57:50] (I): [PLUGIN] Gutenberg Blocks and Template Library by Otter : v1.5.8 (ThemeIsle)
+[17/Nov/2020:16:57:50] (I): [PLUGIN] Page scroll to id : v1.6.9 (malihu)
+[17/Nov/2020:16:57:50] (I): [PLUGIN] Templates Patterns Collection : v1.0.11 (ThemeIsle)
+[17/Nov/2020:16:57:50] (I): [PLUGIN] WPForms Lite : v1.6.3.1 (WPForms)

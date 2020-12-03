@@ -1,0 +1,199 @@
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ShapeDiver API - First Example</title>
+    <!-- ShapeDiver Viewer -->
+    <script src="https://viewer.shapediver.com/v2/2.19.3/sdv.concat.min.js"></script>
+    <!-- ShapeDiver Viewer Controls and Export Modal Dialog Dependencies -->
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/css/uikit.min.css" integrity="sha256-sO/kKFCHPL4rhYHDyHC2dwGlaIBttifOfQ0ZaGLAheo=" crossorigin="anonymous" />
+    <!-- UIkit JS -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/js/uikit.min.js" integrity="sha256-jN++RwBoYassp9qTuZDfQuptszFdL1Pm4dKZWS5KjjY=" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/js/uikit-icons.min.js" integrity="sha256-6pktS+jePPdXx9oCn8r4hS5jR1eq0Ry7vbifYtG0LDU=" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+    <!-- ShapeDiver Viewer Main Container -->
+    <div id='sdv-container' style="width:100%;height:600px;">
+    </div>
+    <div id="info">
+      Click on the mesh to pick a point on it...
+    </div>
+    <div>
+      <input type="button" value ="Download" onclick="exportFile()">
+    </div>
+    <div>
+      <input id="image-file" type="file">
+    </div>
+    <script>
+    // container for the viewer, typically this is a div
+var _container = document.getElementById('sdv-container');
+// viewer settings
+var _viewerSettings = {
+  // container to use
+  container: _container,
+  // when creating the viewer, we want to get back an API v2 object
+  api: {
+    version: 2
+  },
+  // ticket for a ShapeDiver model
+  ticket: '77ed2f267756a8d0bc9dfa1a9cf3ba4e6bcd2989113069c6ac7ce91a4cb261c84d7b79d59f9da5fd3125d000d1469b108f43b0246fa5bea4d9b5ace1ff26af124c1d63e7572292a62d5ec0e6ba23e79c9f677cbb8bffa5e6124b4b6ad5d71f7baa5b51364d60eaeace4cb812b399515bd2011b51eb6f-acdcf4a51db17b9582fb3b9c0fbe750f',
+  modelViewUrl: 'eu-central-1'
+};
+
+// create the viewer, get back an API v2 object
+var api = new SDVApp.ParametricViewer(_viewerSettings);
+
+// defining effects for hoverable and selectable objects
+var highlightEffect = {
+  active: {
+    name: 'colorHighlight',
+    options: {
+      color: [255, 255, 255]
+    }
+  }
+};
+
+// defining a group of hoverable and selectable objects
+var sphereGroup = {
+  id: "spheres",
+  draggable: true,
+  dragEffect: highlightEffect,
+  hoverable: true,
+  hoverEffect: highlightEffect
+};
+var headGroup = {
+  id: "Head",
+  selectable: true
+};
+
+var viewerInit = false;
+var selectedSphere;
+var hoverPos;
+var points = [];
+var pickPoint = {};
+api.scene.addEventListener(api.scene.EVENTTYPE.VISIBILITY_ON, function() {
+
+  if (!viewerInit) {
+    api.scene.updateInteractionGroups(sphereGroup);
+    api.scene.updateInteractionGroups(headGroup);
+    var assets = api.scene.get(null, "CommPlugin_1");
+    var updateObjects = [];
+    for (let assetnum in assets.data) {
+      var asset = assets.data[assetnum];
+      let updateObject = {};
+      if (asset.name.includes("Sphere_")) {
+        updateObject = {
+          id: asset.id,
+          duration: 0,
+          interactionGroup: sphereGroup.id,
+        };
+      } else if (asset.name == "Head") {
+        updateObject = {
+          id: asset.id,
+          duration: 0,
+          interactionGroup: headGroup.id
+        };
+      } else {
+        updateObject = {
+          id: asset.id,
+          duration: 0
+        };
+      }
+      updateObjects.push(updateObject);
+
+    }
+    api.scene.updatePersistentAsync(updateObjects, 'CommPlugin_1');
+    api.scene.addEventListener(api.scene.EVENTTYPE.DRAG_END, dragCallback);
+    api.scene.addEventListener(api.scene.EVENTTYPE.SELECT_ON, addPoint);
+  }
+
+});
+
+//var updateHoverPos = function(event) {
+//	hoverPos=event.hoverPos;
+//}
+
+var dragCallback = function(event) {
+
+  // find which sphere was selected
+  let sphereID = event.scenePath.split(".")[1];
+  let sphereAsset = api.scene.get({
+    id: sphereID
+  }, "CommPlugin_1");
+  selectedSphere = sphereAsset.data[0].name.split("_")[1];
+  let newPos = event.dragPosAbs;
+  points[selectedSphere][0] = newPos.x;
+  points[selectedSphere][1] = newPos.y;
+  points[selectedSphere][2] = newPos.z;
+  api.parameters.updateAsync({
+    name: "Points",
+    value: JSON.stringify({
+      'points': points
+    })
+  });
+
+};
+
+var addPoint = function(event) {
+
+	pickPoint = event.selectPos;
+  if (points.length < 3) {
+    points.push([pickPoint.x, pickPoint.y, pickPoint.z]);
+    console.log(points);
+    api.parameters.updateAsync({
+      name: "Points",
+      value: JSON.stringify({
+        'points': points
+      })
+    });
+    if (points.length == 1) {
+      document.getElementById("info").innerHTML += "<br>Drag existing points to update their position on the mesh...";
+    }
+    if (points.length == 3) {
+      document.getElementById("info").innerHTML += "<br>Maximum number of points added.";
+    }
+  }
+  api.scene.updateSelected(null,api.scene.getSelected());
+};
+
+function exportFile() {
+  api.exports.requestAsync({name: "Export"}).then(
+    function(response){
+      let link = response.data.content[0].href;
+      console.log("Use this link to download the file: " + link);
+      window.location=link;
+    }
+  );
+}
+
+document.getElementById("image-file").onchange = function(res) {
+  let file = document.getElementById("image-file").files[0];
+  api.parameters.updateAsync({
+    name: "Head",
+    value: file
+  }).then(
+    function(response) {
+      alert("File successfully uploaded", response);
+    }
+  );
+};
+
+
+var resetPoints = function() {
+	points = [];
+  document.getElementById("info").innerHTML = "Click on the mesh to pick a point on it...";
+  api.parameters.updateAsync({
+      name: "Points",
+      value: JSON.stringify({
+        'points': []
+      })
+    });
+};
+
+</script>
+  </body>
+
+</html>
