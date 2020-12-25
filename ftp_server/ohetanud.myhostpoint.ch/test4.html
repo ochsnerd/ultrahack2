@@ -1,0 +1,156 @@
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ShapeDiver API - First Example</title>
+    <!-- ShapeDiver Viewer -->
+    <script src="https://viewer.shapediver.com/v2/2.13.0/sdv.concat.min.js"></script>
+  </head>
+
+  <body>
+    <!-- ShapeDiver Viewer Main Container -->
+    <div id='sdv-container' style="width:100%;height:300px;">
+    </div>
+    <div id="placeholder">
+      <p>
+        Select a sphere...
+      </p>
+    </div>
+    <div id="parameters" hidden>
+      <input type=range min=1 max=5 id="Radius" onchange="updateRadius(this.value);">
+      <label id="Radiuslabel" for="Radius">Radius of the selected sphere</label>
+      <br>
+      <input type=color id="Color" onchange="updateColor(this.value);">
+      <label id="Colorlabel" for="Color">Color of the selected sphere</label>
+    </div>
+    <script>
+    // container for the viewer, typically this is a div
+var _container = document.getElementById('sdv-container');
+// viewer settings
+var _viewerSettings = {
+  // container to use
+  container: _container,
+  // when creating the viewer, we want to get back an API v2 object
+  api: {
+    version: 2
+  },
+  // ticket for a ShapeDiver model
+  ticket: '40208ab9a1316c174578ec4ff3146002aca34c752a7a22f616bea9e2d520a3f0c77ecc3dd31aeade7663ad9b74372ac21f9e14280f4b70a478bc2a22dfddff9903f48ffeadb4a61d57529bf3d020360c59f2f1b957b1654b6f5fab19d28754e2f6d18a9f9894cd7f9763e7977ccc3b0fc8f109dd2a5b-2d90ff927f2b82144f8dd06e63c6eefa',
+  modelViewUrl: 'eu-central-1'
+};
+
+// create the viewer, get back an API v2 object
+var api = new SDVApp.ParametricViewer(_viewerSettings);
+
+// defining effects for hoverable and selectable objects
+var hoverEffect = {
+  active: {
+    name: 'colorHighlight',
+    options: {
+      color: [100, 100, 100]
+    }
+  }
+};
+var selectionEffect = {
+  active: {
+    name: 'colorHighlight',
+    options: {
+      color: [255, 255, 255]
+    }
+  }
+};
+
+// defining a group of hoverable and selectable objects
+var sphereGroup = {
+  id: "spheres",
+  hoverable: true,
+  hoverEffect: hoverEffect,
+  selectable: true,
+  selectionEffect: selectionEffect
+};
+
+var viewerInit = false;
+var selectedSphere;
+var updateObjects = [];
+api.scene.addEventListener(api.scene.EVENTTYPE.VISIBILITY_ON, function() {
+
+  if (!viewerInit) {
+    api.scene.updateInteractionGroups(sphereGroup);
+    var assets = api.scene.get(null, "CommPlugin_1");
+    for (let assetnum in assets.data) {
+      var asset = assets.data[assetnum];
+      let updateObject = {
+        id: asset.id,
+        duration: 0,
+        interactionGroup: sphereGroup.id,
+      };
+      updateObjects.push(updateObject);
+    }
+    api.scene.updatePersistentAsync(updateObjects, 'CommPlugin_1');
+    api.scene.addEventListener(api.scene.EVENTTYPE.SELECT_ON, selectCallback);
+    api.scene.addEventListener(api.scene.EVENTTYPE.SELECT_OFF, unselectCallback);
+  }
+
+});
+
+var selectCallback = function(event) {
+
+	// find which sphere was selected
+  let sphereID = event.scenePath.split(".")[1];
+  let sphereAsset = api.scene.get({
+    id: sphereID
+  }, "CommPlugin_1");
+  selectedSphere = sphereAsset.data[0].name.split("_")[1];
+
+  // center and zoom the camera on the selected sphere
+  api.scene.camera.zoomAsync([event.scenePath],{duration:500});
+
+  // hide placeholder and show inputs
+  document.getElementById("placeholder").setAttribute("hidden", "");
+  document.getElementById("parameters").removeAttribute("hidden", "");
+
+  // radius control
+  let val = api.parameters.get({name: "Radius_" + selectedSphere.toString()}).data[0].value;
+  document.getElementById("Radius").value = val;
+
+  // color control
+  val = api.parameters.get({name: "Color_" + selectedSphere.toString()}).data[0].value;
+  document.getElementById("Color").value = val.substring(0, val.length-2).replace("0x", "#");
+
+};
+
+var unselectCallback = function(event) {
+  document.getElementById("parameters").setAttribute("hidden", "");
+  document.getElementById("placeholder").removeAttribute("hidden", "");
+  api.scene.camera.zoomAsync(null,{duration:500});
+};
+
+var updateRadius = function(val) {
+  let param = "Radius_" + selectedSphere.toString();
+  api.parameters.updateAsync({
+    name: param,
+    value: val
+  }).then(
+    function(response) {
+      api.scene.updateSelected(null,api.scene.getSelected());
+    }
+  );
+};
+
+var updateColor = function(val) {
+  let param = "Color_" + selectedSphere.toString();
+  api.parameters.updateAsync({
+    name: param,
+    value: val
+  }).then(
+    function(response) {
+      api.scene.updateSelected(null,api.scene.getSelected());
+    }
+  );
+};
+</script>
+
+  </body>
+
+</html>

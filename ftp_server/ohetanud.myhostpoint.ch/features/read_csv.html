@@ -1,0 +1,37 @@
+<body>
+  <div>
+    <input id="csv-file" type="file">
+  </div>
+  <script>
+    
+    function parse_csv(all_text) {
+        seperator_char = ','
+        comment_char = '#'
+        var allTextLines = all_text.split(/\r\n|\n/);
+        var allTextLines = allTextLines.filter(line => line[0] != comment_char);
+        var num_entries = allTextLines[0].split(seperator_char).length;
+        var data = [];
+        
+        while (allTextLines.length > 0) {
+            var entries = allTextLines.shift().split(seperator_char);
+            if (entries.length != num_entries) {
+                continue;
+            }
+            data.push(entries.map(e => parseFloat(e)));
+        }
+        return data
+    }
+
+    document.getElementById("csv-file").onchange = function(res) {
+        var file = document.getElementById("csv-file").files[0];
+        var reader = new FileReader();
+        reader.onload = function() {
+            // here the file contents are available as reader.result
+            data = parse_csv(reader.result);
+            console.log(data)
+        }
+        reader.readAsBinaryString(file);
+    }
+  </script>
+
+</body>

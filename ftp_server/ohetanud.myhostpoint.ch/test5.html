@@ -47,6 +47,8 @@
         // create the viewer, get back an API v2 object
         var api = new SDVApp.ParametricViewer(_viewerSettings);
 
+
+
         var viewerInit = false;
         var parameters;
         api.scene.addEventListener(api.scene.EVENTTYPE.VISIBILITY_ON, function() {
@@ -63,11 +65,8 @@
               let param = parameters.data[i];
               let label = document.createElement("label");
               label.setAttribute("for", param.id);
-                label.innerHTML = param.name;
-                console.log(param.type)
+              label.innerHTML = param.name;
               if (param.type == "Int" || param.type == "Float" || param.type == "Even" || param.type == "Odd") {
-                console.log("init float")
-                console.log(param.name)
                 paramInput = document.createElement("input");
                 paramInput.setAttribute("id", param.id);
                 paramInput.setAttribute("type", "range");
@@ -135,15 +134,11 @@
                   });
                 };
               }
-                else if (param.type == "File") {
-                    console.log("file param, do nothing");
-                }
               if (param.hidden) paramDiv.setAttribute("hidden", "");
               paramDiv.appendChild(label);
               paramDiv.appendChild(paramInput);
               globalDiv.appendChild(paramDiv);
             }
-              console.log("mid init")
 
             var exports = api.exports.get();
             for (let i = 0; i < exports.data.length; i++) {
@@ -167,9 +162,7 @@
               exportDiv.appendChild(exportInput);
               globalDiv.appendChild(exportDiv);
             }
-              viewerInit = true;
-
-              console.log("finish init")
+            viewerInit = true;
           }
         });
 

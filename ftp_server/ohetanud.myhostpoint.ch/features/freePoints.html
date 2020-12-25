@@ -1,0 +1,34 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ShapeDiver API - First Example</title>
+    <!-- ShapeDiver Viewer -->
+    <script src="https://viewer.shapediver.com/v2/2.19.3/sdv.concat.min.js"></script>
+    <!-- ShapeDiver Viewer Controls and Export Modal Dialog Dependencies -->
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/css/uikit.min.css" integrity="sha256-sO/kKFCHPL4rhYHDyHC2dwGlaIBttifOfQ0ZaGLAheo=" crossorigin="anonymous" />
+    <!-- UIkit JS -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/js/uikit.min.js" integrity="sha256-jN++RwBoYassp9qTuZDfQuptszFdL1Pm4dKZWS5KjjY=" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/js/uikit-icons.min.js" integrity="sha256-6pktS+jePPdXx9oCn8r4hS5jR1eq0Ry7vbifYtG0LDU=" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+    <!-- ShapeDiver Viewer Main Container -->
+    <div id='sdv-container' style="width:100%;height:600px;">
+    </div>
+    <div id="parameters">
+    </div>
+    <div>
+      <input type="button" value ="Download" onclick="exportFile()">
+    </div>
+    <div>
+      <input id="import" type="file">
+    </div>
+    
+    <script type="text/javascript" src="../js/pick_points.js"></script>
+
+    
+  </body>
+
+</html>
